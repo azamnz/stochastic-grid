@@ -104,12 +104,9 @@ public final class GridWorld {
         return states;
     }
 
-    /** Правка клетки по кругу: пусто → стена → +1 → −1 → пусто */
+    /** Правка клетки по кругу: пусто → стена → +1 → −1 → пусто; на старте отказ из конструктора */
     public GridWorld cycle(Cell c) {
         requireInside(c);
-        if (c.equals(start)) {
-            throw new IllegalArgumentException("старт нельзя менять: " + c);
-        }
         Set<Cell> w = new HashSet<>(walls);
         Map<Cell, Double> e = new HashMap<>(exits);
         switch (kind(c)) {
