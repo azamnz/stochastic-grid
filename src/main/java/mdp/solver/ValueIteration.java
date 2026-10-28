@@ -20,7 +20,7 @@ public final class ValueIteration implements Solver {
     public ValueIteration(Mdp mdp) {
         this.mdp = mdp;
         Utilities u = Utilities.initial(mdp);
-        history.add(new Snapshot(0, u, Bellman.improve(mdp, u, null), Double.NaN, 0, 0));
+        history.add(new Snapshot(0, u, Bellman.improve(mdp, u), Double.NaN, 0, 0));
     }
 
     @Override
@@ -34,10 +34,10 @@ public final class ValueIteration implements Solver {
         Map<Cell, Double> next = new HashMap<>();
         for (Cell s : mdp.states()) {
             next.put(s, mdp.terminal(s) ? mdp.reward(s)
-                    : mdp.reward(s) + gamma * Bellman.expected(mdp, s, Bellman.best(mdp, s, u, null), u));
+                    : mdp.reward(s) + gamma * Bellman.expected(mdp, s, Bellman.best(mdp, s, u), u));
         }
         Utilities nu = new Utilities(next);
-        Policy policy = Bellman.improve(mdp, nu, last.policy());
+        Policy policy = Bellman.improve(mdp, nu);
         history.add(new Snapshot(last.iteration() + 1, nu, policy, nu.maxDiff(u), policy.changes(last.policy()), 1));
     }
 

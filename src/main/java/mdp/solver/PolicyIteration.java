@@ -59,7 +59,7 @@ public final class PolicyIteration implements Solver {
             sweeps++;
         } while (delta >= EPSILON && sweeps < MAX_SWEEPS);
         evaluated = delta < EPSILON;
-        Policy improved = Bellman.improve(mdp, u, policy);
+        Policy improved = Bellman.improve(mdp, u);
         history.add(new Snapshot(last.iteration() + 1, u, improved, u.maxDiff(last.utilities()),
                 improved.changes(policy), sweeps));
     }
@@ -76,7 +76,7 @@ public final class PolicyIteration implements Solver {
 
     @Override
     public boolean converged() {
-        return evaluated && current().iteration() > 0 && current().changed() == 0;
+        return evaluated && current().changed() == 0;
     }
 
     @Override
