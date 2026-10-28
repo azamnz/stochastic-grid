@@ -158,6 +158,9 @@ class AppControllerTest {
         c.robotStep();
         c.clickCell(new Cell(3, 1));
         assertEquals(0, c.robot().steps());
+        c.robotStep();
+        c.solve();
+        assertEquals(0, c.robot().steps());
     }
 
     @Test
@@ -235,6 +238,43 @@ class AppControllerTest {
         c.tick(10 * SECOND);
         c.tick(10 * SECOND + SECOND / 4);
         assertEquals(3, c.robot().steps());
+    }
+
+    @Test
+    void leftoverTimeBeforePauseIsDropped() {
+        AppController c = endless();
+        c.setSpeed(4);
+        c.startRobot();
+        c.tick(0);
+        c.tick(3 * SECOND / 10);
+        assertEquals(1, c.robot().steps());
+        c.pause();
+        c.startRobot();
+        c.tick(10 * SECOND);
+        c.tick(10 * SECOND + 2 * SECOND / 10);
+        assertEquals(1, c.robot().steps(), "0.2 с до паузы + 0.2 с после — ещё не шаг");
+    }
+
+    @Test
+    void leftoverTimeBetweenFramesIsKept() {
+        AppController c = endless();
+        c.setSpeed(4);
+        c.startRobot();
+        c.tick(0);
+        for (int i = 1; i <= 10; i++) {
+            c.tick(i * 15 * SECOND / 100);
+        }
+        assertEquals(6, c.robot().steps(), "кадры по 0.15 с: за 1.5 с шесть шагов");
+    }
+
+    @Test
+    void stoppedRobotCannotStart() {
+        AppController c = endless();
+        while (!c.robot().stopped()) {
+            c.robotStep();
+        }
+        c.startRobot();
+        assertFalse(c.isRunning());
     }
 
     @Test

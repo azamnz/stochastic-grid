@@ -6,6 +6,7 @@ import mdp.model.Mdp;
 import mdp.model.Settings;
 import mdp.robot.Robot;
 import mdp.solver.Algorithm;
+import mdp.solver.Snapshot;
 import mdp.solver.Solver;
 import mdp.solver.ValueIteration;
 import org.junit.jupiter.api.Test;
@@ -36,6 +37,7 @@ class TextsTest {
         assertEquals("5 итераций", Texts.count(5, "итерация", "итерации", "итераций"));
         assertEquals("11 итераций", Texts.count(11, "итерация", "итерации", "итераций"));
         assertEquals("12 итераций", Texts.count(12, "итерация", "итерации", "итераций"));
+        assertEquals("14 итераций", Texts.count(14, "итерация", "итерации", "итераций"));
         assertEquals("21 итерация", Texts.count(21, "итерация", "итерации", "итераций"));
         assertEquals("22 итерации", Texts.count(22, "итерация", "итерации", "итераций"));
         assertEquals("111 итераций", Texts.count(111, "итерация", "итерации", "итераций"));
@@ -80,6 +82,29 @@ class TextsTest {
         assertEquals("… пропущено " + (ValueIteration.MAX_ITERATIONS + 1 - Texts.JOURNAL_HEAD - Texts.JOURNAL_TAIL) + " …",
                 lines.get(Texts.JOURNAL_HEAD));
         assertTrue(lines.getLast().startsWith("Итерация " + ValueIteration.MAX_ITERATIONS + " "));
+    }
+
+    private static List<Snapshot> fake(int size, double delta) {
+        List<Snapshot> list = new java.util.ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            list.add(new Snapshot(i, null, null, delta, 0, 1));
+        }
+        return list;
+    }
+
+    @Test
+    void journalAtLimitIsWholeAndOneMoreIsShortened() {
+        int limit = Texts.JOURNAL_HEAD + Texts.JOURNAL_TAIL;
+        assertEquals(limit, Texts.journal(Algorithm.VALUE, fake(limit, 1)).size());
+        List<String> lines = Texts.journal(Algorithm.VALUE, fake(limit + 1, 1));
+        assertEquals("… пропущено 1 …", lines.get(Texts.JOURNAL_HEAD));
+        assertEquals(limit + 1, lines.size());
+    }
+
+    @Test
+    void changeBelowThousandthIsScientific() {
+        assertTrue(Texts.journal(Algorithm.VALUE, fake(2, 0.001)).get(1).contains("U 0.001 ·"));
+        assertTrue(Texts.journal(Algorithm.VALUE, fake(2, 0.0005)).get(1).contains("U 5.0e-04 ·"));
     }
 
     @Test
