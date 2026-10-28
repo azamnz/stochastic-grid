@@ -68,6 +68,13 @@ class RobotTest {
     }
 
     @Test
+    void roundingShortfallFallsToLastOutcome() {
+        List<Outcome> o = List.of(new Outcome(Move.UP, new Cell(1, 2), 0.5),
+                new Outcome(Move.RIGHT, new Cell(2, 1), 0.4999999));
+        assertEquals(Move.RIGHT, Robot.pick(o, 0.99999995).move());
+    }
+
+    @Test
     void sameSeedSameWalk() {
         Mdp mdp = new Mdp(GridWorld.pdfExample(), Settings.defaults());
         Policy p = solved(mdp);
