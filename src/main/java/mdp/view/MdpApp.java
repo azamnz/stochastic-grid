@@ -98,8 +98,11 @@ public class MdpApp extends Application {
         timer = new AnimationTimer() {
             @Override
             public void handle(long now) {
-                controller.tick(now);
-                refresh();
+                // кадр без бега робота ничего не меняет: окно обновляют кнопки
+                if (controller.isRunning()) {
+                    controller.tick(now);
+                    refresh();
+                }
             }
         };
         fillSettings();
@@ -209,6 +212,7 @@ public class MdpApp extends Application {
         });
         Button newWalk = button("Новый путь", "newWalk", controller::newWalk);
         robotStatus.setWrapText(true);
+        speedLabel.getStyleClass().add("muted");
         robotStatus.getStyleClass().add("value");
         speed.setValue(SpeedScale.toSlider(controller.getSpeed()));
         speed.valueProperty().addListener((o, a, b) -> {
@@ -327,14 +331,13 @@ public class MdpApp extends Application {
                 + ", R = " + FormField.text(s.stepReward()) + ", γ = " + FormField.text(s.gamma())
                 + ", вперёд " + FormField.text(s.forward()) + ", вбок по " + FormField.text(Math.round(s.side() * 1e9) / 1e9));
         solverStatus.setText(Texts.solverStatus(solver));
-        solverStatus.getStyleClass().setAll("label", solver.exhausted() ? "message" : "status");
+        style(solverStatus, solver.exhausted() ? "message" : "status");
         robotRun.setText(controller.isRunning() ? "Пауза" : "Пустить");
         boolean over = robot.finished() || robot.stopped();
         robotRun.setDisable(over);
         robotStep.setDisable(over);
         robotStatus.setText(Texts.robotStatus(robot));
         speedLabel.setText(Texts.count(controller.getSpeed(), "шаг", "шага", "шагов") + " в секунду");
-        speedLabel.getStyleClass().setAll("label", "muted");
         message.setText(controller.message() == null ? "" : controller.message());
         if (algorithms.getSelectedToggle() != null && algorithms.getSelectedToggle().getUserData() != controller.algorithm()) {
             algorithms.getToggles().stream().filter(t -> t.getUserData() == controller.algorithm()).findFirst()
@@ -356,6 +359,13 @@ public class MdpApp extends Application {
             setJournal(robotJournal, robot.journal().stream().map(RobotStep::toString).toList());
             drawnRobot = robot;
             drawnSteps = robot.steps();
+        }
+    }
+
+    /** Стиль меняем, только если он другой: иначе CSS пересчитывается заново */
+    private static void style(Label label, String cls) {
+        if (!label.getStyleClass().contains(cls)) {
+            label.getStyleClass().setAll("label", cls);
         }
     }
 
