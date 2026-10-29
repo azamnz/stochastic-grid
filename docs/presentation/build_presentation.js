@@ -202,6 +202,24 @@ const bullets = (slide, items, box, size = 17) => slide.addText(
   s.addNotes('Оптимальная стратегия не гарантирует победу — она даёт наибольшую среднюю сумму. Случайное число r: меньше 0,8 — вперёд, до 0,9 — влево, иначе вправо.');
 }
 
+// ---------- 8а. Лабиринт ----------
+{
+  const s = pres.addSlide();
+  s.background = { color: C.white };
+  title(s, 'Большое поле: лабиринт 10×10', 'Стены змейкой и три ловушки; R = −0,01, потому что путь около 60 шагов');
+  fit(s, shot('gui_14_maze_robot.png'), 0.6, 1.8, 7.6, 5.3);
+  const stats = [
+    ['187', 'итераций по значениям', ARROW],
+    ['10', 'итераций по стратегиям — ответ тот же', ARROW],
+    ['≈ 10 %', 'путей в −1 по 2000 запускам', MINUS],
+  ];
+  stats.forEach(([v, l, col], i) => {
+    s.addText(v, { x: 8.6, y: 1.9 + i * 1.6, w: 4.1, h: 0.8, fontFace: HEAD, fontSize: 38, bold: true, color: col, margin: 0, isTextBox: true });
+    s.addText(l, { x: 8.6, y: 2.7 + i * 1.6, w: 4.1, h: 0.7, fontFace: BODY, fontSize: 15, color: C.muted, margin: 0, isTextBox: true });
+  });
+  s.addNotes('При R = −0,04 путь стоит дороже выигрыша (U старта −1,07), поэтому плата меньше. У ловушек (6,2) и (9,5) робот стоит спиной к ним и упирается в край и в стену — назад ветер не сносит.');
+}
+
 // ---------- 9. Архитектура ----------
 {
   const s = pres.addSlide();
