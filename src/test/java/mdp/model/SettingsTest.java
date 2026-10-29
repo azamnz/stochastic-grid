@@ -42,6 +42,17 @@ class SettingsTest {
     }
 
     @Test
+    void messagesShowNumbersAsTyped() {
+        InvalidSettingsException e = assertThrows(InvalidSettingsException.class, () -> new Settings(11.50, 0, 1.5));
+        List<String> m = e.problems().stream().map(InvalidSettingsException.Problem::message).toList();
+        assertEquals("R(s): допустимо от −10 до 10, указано 11.5", m.get(0));
+        assertEquals("γ: допустимо больше 0 и не больше 1, указано 0", m.get(1));
+        assertEquals("Вероятность идти куда хотел: допустимо от 0 до 1, указано 1.5", m.get(2));
+        InvalidSettingsException nan = assertThrows(InvalidSettingsException.class, () -> new Settings(Double.NaN, 1, 0.8));
+        assertEquals("R(s): допустимо от −10 до 10, указано NaN", nan.problems().getFirst().message());
+    }
+
+    @Test
     void nanAndInfinityRejected() {
         assertThrows(InvalidSettingsException.class, () -> new Settings(Double.NaN, 1, 0.8));
         assertThrows(InvalidSettingsException.class, () -> new Settings(0, Double.NaN, 0.8));

@@ -1,5 +1,6 @@
 package mdp.model;
 
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,19 +24,24 @@ public record Settings(double stepReward, double gamma, double forward) {
         // !(a <= x) ловит и NaN
         if (!(stepReward >= -MAX_REWARD && stepReward <= MAX_REWARD)) {
             problems.add(new InvalidSettingsException.Problem("stepReward",
-                    "R(s): допустимо от −" + (int) MAX_REWARD + " до " + (int) MAX_REWARD + ", указано " + stepReward));
+                    "R(s): допустимо от −" + (int) MAX_REWARD + " до " + (int) MAX_REWARD + ", указано " + show(stepReward)));
         }
         if (!(gamma > 0 && gamma <= 1)) {
             problems.add(new InvalidSettingsException.Problem("gamma",
-                    "γ: допустимо больше 0 и не больше 1, указано " + gamma));
+                    "γ: допустимо больше 0 и не больше 1, указано " + show(gamma)));
         }
         if (!(forward >= 0 && forward <= 1)) {
             problems.add(new InvalidSettingsException.Problem("forward",
-                    "Вероятность идти куда хотел: допустимо от 0 до 1, указано " + forward));
+                    "Вероятность идти куда хотел: допустимо от 0 до 1, указано " + show(forward)));
         }
         if (!problems.isEmpty()) {
             throw new InvalidSettingsException(problems);
         }
+    }
+
+    /** Число без лишних нулей: «0», а не «0.0» */
+    private static String show(double v) {
+        return Double.isFinite(v) ? BigDecimal.valueOf(v).stripTrailingZeros().toPlainString() : String.valueOf(v);
     }
 
     /** Вероятность сноса в одну сторону */
