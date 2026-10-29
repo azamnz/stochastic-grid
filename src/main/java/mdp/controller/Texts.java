@@ -59,9 +59,12 @@ public final class Texts {
             return head + (algorithm == Algorithm.VALUE
                     ? "начало: U = 0, в выходах их награда" : "начальная стратегия: все стрелки вверх");
         }
-        String eval = algorithm == Algorithm.POLICY
-                ? "оценка стратегии за " + count(s.sweeps(), "проход", "прохода", "проходов") + " · " : "";
-        return head + eval + "наибольшее изменение U " + delta(s.delta()) + " · стрелок поменялось " + s.changed();
+        return switch (s.phase()) {
+            case EVALUATE -> head + "оценка стратегии за " + count(s.sweeps(), "проход", "прохода", "проходов")
+                    + " · наибольшее изменение U " + delta(s.delta());
+            case IMPROVE -> head + "улучшение: стрелок поменялось " + s.changed();
+            default -> head + "наибольшее изменение U " + delta(s.delta()) + " · стрелок поменялось " + s.changed();
+        };
     }
 
     private static String delta(double d) {
@@ -77,7 +80,11 @@ public final class Texts {
             return "Не сошлось за " + count(it, "итерацию", "итерации", "итераций")
                     + ": при γ = 1 так бывает, если из каких-то клеток не дойти до выхода";
         }
-        return "Итерация " + it + ", решение ещё не сошлось";
+        return switch (solver.current().phase()) {
+            case EVALUATE -> "Итерация " + it + ": стрелки оценены, следующий шаг — улучшение";
+            case IMPROVE -> "Итерация " + it + ": стрелки улучшены, следующий шаг — оценка";
+            default -> "Итерация " + it + ", решение ещё не сошлось";
+        };
     }
 
     public static String robotStatus(Robot robot) {

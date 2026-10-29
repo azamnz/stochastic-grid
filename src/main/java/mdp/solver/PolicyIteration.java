@@ -32,18 +32,27 @@ public final class PolicyIteration implements Solver {
                 up.put(s, Move.UP);
             }
         }
-        history.add(new Snapshot(0, Utilities.initial(mdp), new Policy(up), Double.NaN, 0, 0));
+        history.add(new Snapshot(0, Utilities.initial(mdp), new Policy(up), Double.NaN, 0, 0, Phase.START));
     }
 
+    /** Шаги чередуются: оценка, улучшение, оценка… */
     @Override
     public void step() {
         if (converged() || exhausted()) {
             return;
         }
+        if (current().phase() == Phase.EVALUATE) {
+            improve();
+        } else {
+            evaluate();
+        }
+    }
+
+    /** Оценка: числа для текущих стрелок; начинаем с прошлой U, так быстрее */
+    private void evaluate() {
         Snapshot last = current();
         Policy policy = last.policy();
         double gamma = mdp.settings().gamma();
-        // оценка: начинаем с прошлой U, так быстрее
         Utilities u = last.utilities();
         int sweeps = 0;
         double delta;
@@ -59,9 +68,16 @@ public final class PolicyIteration implements Solver {
             sweeps++;
         } while (delta >= EPSILON && sweeps < MAX_SWEEPS);
         evaluated = delta < EPSILON;
-        Policy improved = Bellman.improve(mdp, u);
-        history.add(new Snapshot(last.iteration() + 1, u, improved, u.maxDiff(last.utilities()),
-                improved.changes(policy), sweeps));
+        history.add(new Snapshot(last.iteration() + 1, u, policy, u.maxDiff(last.utilities()), 0, sweeps,
+                Phase.EVALUATE));
+    }
+
+    /** Улучшение: в каждой клетке лучший ход по только что посчитанным числам */
+    private void improve() {
+        Snapshot last = current();
+        Policy improved = Bellman.improve(mdp, last.utilities());
+        history.add(new Snapshot(last.iteration(), last.utilities(), improved, 0, improved.changes(last.policy()), 0,
+                Phase.IMPROVE));
     }
 
     @Override
@@ -76,11 +92,11 @@ public final class PolicyIteration implements Solver {
 
     @Override
     public boolean converged() {
-        return evaluated && current().changed() == 0;
+        return evaluated && current().phase() == Phase.IMPROVE && current().changed() == 0;
     }
 
     @Override
     public boolean exhausted() {
-        return !converged() && current().iteration() >= MAX_ITERATIONS;
+        return !converged() && current().phase() == Phase.IMPROVE && current().iteration() >= MAX_ITERATIONS;
     }
 }

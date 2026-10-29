@@ -7,5 +7,6 @@ package mdp.solver;
  * @param changed сколько стрелок поменялось
  * @param sweeps  проходов оценки стратегии (для итерации по значениям 1)
  */
-public record Snapshot(int iteration, Utilities utilities, Policy policy, double delta, int changed, int sweeps) {
+public record Snapshot(int iteration, Utilities utilities, Policy policy, double delta, int changed, int sweeps,
+                       Phase phase) {
 }

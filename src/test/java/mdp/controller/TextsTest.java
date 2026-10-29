@@ -6,6 +6,7 @@ import mdp.model.Mdp;
 import mdp.model.Settings;
 import mdp.robot.Robot;
 import mdp.solver.Algorithm;
+import mdp.solver.Phase;
 import mdp.solver.Snapshot;
 import mdp.solver.Solver;
 import mdp.solver.ValueIteration;
@@ -57,10 +58,13 @@ class TextsTest {
     void policyIterationLines() {
         Solver pi = Algorithm.POLICY.create(pdf);
         pi.step();
+        pi.step();
         List<String> lines = Texts.journal(Algorithm.POLICY, pi.history());
         assertEquals("Итерация 0 · начальная стратегия: все стрелки вверх", lines.get(0));
-        assertTrue(lines.get(1).matches("Итерация 1 · оценка стратегии за \\d+ проход(а|ов)? · наибольшее изменение U \\d\\.\\d{3} · стрелок поменялось \\d+"),
+        assertTrue(lines.get(1).matches("Итерация 1 · оценка стратегии за \\d+ проход(а|ов)? · наибольшее изменение U \\d\\.\\d{3}"),
                 lines.get(1));
+        assertEquals("Итерация 1 · улучшение: стрелок поменялось 6", lines.get(2));
+        assertEquals(3, lines.size());
     }
 
     @Test
@@ -87,7 +91,7 @@ class TextsTest {
     private static List<Snapshot> fake(int size, double delta) {
         List<Snapshot> list = new java.util.ArrayList<>();
         for (int i = 0; i < size; i++) {
-            list.add(new Snapshot(i, null, null, delta, 0, 1));
+            list.add(new Snapshot(i, null, null, delta, 0, 1, i == 0 ? Phase.START : Phase.VALUE));
         }
         return list;
     }
@@ -124,6 +128,18 @@ class TextsTest {
         Solver bad = Algorithm.VALUE.create(new Mdp(noExits, Settings.defaults()));
         bad.solve();
         assertTrue(Texts.solverStatus(bad).startsWith("Не сошлось за 10000 итераций"));
+    }
+
+    @Test
+    void policyStatusSaysWhatComesNext() {
+        Solver pi = Algorithm.POLICY.create(pdf);
+        assertEquals("Итерация 0, решение ещё не сошлось", Texts.solverStatus(pi));
+        pi.step();
+        assertEquals("Итерация 1: стрелки оценены, следующий шаг — улучшение", Texts.solverStatus(pi));
+        pi.step();
+        assertEquals("Итерация 1: стрелки улучшены, следующий шаг — оценка", Texts.solverStatus(pi));
+        pi.solve();
+        assertTrue(Texts.solverStatus(pi).startsWith("Решено за "));
     }
 
     @Test

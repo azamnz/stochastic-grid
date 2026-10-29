@@ -18,6 +18,7 @@ class ValueIterationTest {
     void startsFromZerosAndExitRewards() {
         Snapshot first = new ValueIteration(pdf).current();
         assertEquals(0, first.iteration());
+        assertEquals(Phase.START, first.phase());
         assertEquals(0.0, first.utilities().get(new Cell(1, 1)));
         assertEquals(1.0, first.utilities().get(new Cell(4, 3)));
         assertEquals(-1.0, first.utilities().get(new Cell(4, 2)));
@@ -29,6 +30,7 @@ class ValueIterationTest {
         vi.step();
         Snapshot s = vi.current();
         assertEquals(1, s.iteration());
+        assertEquals(Phase.VALUE, s.phase());
         // (3,3): −0.04 + 0.8·1
         assertEquals(0.76, s.utilities().get(new Cell(3, 3)), 1e-12);
         // остальные: лучший ход никуда не ведёт, только плата за шаг

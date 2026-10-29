@@ -34,7 +34,49 @@ class PolicyIterationTest {
         double u31 = s.utilities().get(new Cell(3, 1));
         assertEquals(-0.04 - 0.8 + 0.1 * u31 + 0.1 * u41, u41, 1e-6);
         assertTrue(s.sweeps() > 1);
-        assertTrue(s.changed() > 0);
+        assertEquals(Phase.EVALUATE, s.phase());
+        assertEquals(1, s.iteration());
+    }
+
+    @Test
+    void evaluationKeepsArrowsAndImprovementKeepsNumbers() {
+        PolicyIteration pi = new PolicyIteration(pdf);
+        pi.step();
+        Snapshot evaluated = pi.current();
+        for (Cell s : pdf.states()) {
+            assertEquals(pdf.terminal(s) ? null : Move.UP, evaluated.policy().get(s), "оценка не трогает стрелки " + s);
+        }
+        assertEquals(0, evaluated.changed());
+        pi.step();
+        Snapshot improved = pi.current();
+        assertEquals(Phase.IMPROVE, improved.phase());
+        assertEquals(1, improved.iteration());
+        assertEquals(6, improved.changed());
+        assertEquals(0, improved.sweeps());
+        assertEquals(0.0, improved.delta());
+        for (Cell s : pdf.states()) {
+            assertEquals(evaluated.utilities().get(s), improved.utilities().get(s), "улучшение не трогает числа " + s);
+        }
+        assertEquals(Move.RIGHT, improved.policy().get(new Cell(1, 3)));
+        pi.step();
+        assertEquals(Phase.EVALUATE, pi.current().phase());
+        assertEquals(2, pi.current().iteration());
+        assertEquals(improved.policy().get(new Cell(1, 3)), pi.current().policy().get(new Cell(1, 3)));
+    }
+
+    @Test
+    void notDoneRightAfterEvaluation() {
+        PolicyIteration pi = new PolicyIteration(pdf);
+        pi.solve();
+        int iterations = pi.current().iteration();
+        PolicyIteration again = new PolicyIteration(pdf);
+        for (int n = 0; n < 100 && (again.current().iteration() < iterations || again.current().phase() != Phase.EVALUATE); n++) {
+            again.step();
+        }
+        assertEquals(Phase.EVALUATE, again.current().phase());
+        assertFalse(again.converged(), "после оценки ещё нужно проверить стрелки");
+        again.step();
+        assertTrue(again.converged());
     }
 
     @Test
@@ -43,6 +85,7 @@ class PolicyIterationTest {
         pi.solve();
         assertTrue(pi.converged());
         assertEquals(0, pi.current().changed());
+        assertEquals(Phase.IMPROVE, pi.current().phase());
         assertTrue(pi.current().iteration() < 10);
         int size = pi.history().size();
         pi.step();
