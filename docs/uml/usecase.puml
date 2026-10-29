@@ -1,0 +1,47 @@
+@startuml usecase
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam shadowing false
+left to right direction
+title Диаграмма прецедентов
+
+actor "Пользователь" as user
+actor "Робот (агент)" as robot
+
+rectangle "Стохастическое окружение" {
+  usecase "Открыть пример из задания" as UC1
+  usecase "Создать новое поле\n(ширина, высота)" as UC2
+  usecase "Править поле:\nстена, +1, −1, старт" as UC3
+  usecase "Задать параметры\nR(s), γ, вероятность" as UC4
+  usecase "Выбрать алгоритм" as UC5
+  usecase "Сделать итерацию" as UC6
+  usecase "Решить до конца" as UC7
+  usecase "Начать решение сначала" as UC8
+  usecase "Пустить робота / шаг робота /\nновый путь" as UC9
+  usecase "Смотреть U(s), стрелки\nи журналы" as UC10
+  usecase "Проверить ввод" as UCV
+  usecase "Выбрать ход по стратегии" as R1
+  usecase "Сдвинуться со сносом ветром" as R2
+  usecase "Получить награду R(s)" as R3
+}
+
+user --> UC1
+user --> UC2
+user --> UC3
+user --> UC4
+user --> UC5
+user --> UC6
+user --> UC7
+user --> UC8
+user --> UC9
+user --> UC10
+UC2 ..> UCV : <<include>>
+UC4 ..> UCV : <<include>>
+UC9 ..> R1 : <<include>>
+robot --> R1
+robot --> R2
+robot --> R3
+R1 ..> R2 : <<include>>
+R2 ..> R3 : <<include>>
+@enduml

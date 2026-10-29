@@ -1,0 +1,129 @@
+@startuml class_model
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+title Диаграмма классов: модель и алгоритмы (mdp.model, mdp.solver)
+
+package mdp.model {
+  enum Move {
+    UP
+    LEFT
+    DOWN
+    RIGHT
+    +left(): Move
+    +right(): Move
+    +title(): String
+    +arrow(): String
+  }
+  class Cell <<record>> {
+    +col: int
+    +row: int
+    +move(m: Move): Cell
+  }
+  enum CellKind {
+    EMPTY
+    WALL
+    EXIT
+  }
+  class GridWorld {
+    -width, height: int
+    -walls: Set<Cell>
+    -exits: Map<Cell, Double>
+    -start: Cell
+    +{static} pdfExample(): GridWorld
+    +{static} blank(w, h): GridWorld
+    +kind(c: Cell): CellKind
+    +states(): List<Cell>
+    +cycle(c: Cell): GridWorld
+    +withStart(c: Cell): GridWorld
+  }
+  class Settings <<record>> {
+    +stepReward: double
+    +gamma: double
+    +forward: double
+    +side(): double
+  }
+  class GridSize <<record>> {
+    +width: int
+    +height: int
+  }
+  class Outcome <<record>> {
+    +move: Move
+    +to: Cell
+    +probability: double
+  }
+  class Mdp {
+    +states(): List<Cell>
+    +terminal(s): boolean
+    +reward(s): double
+    +outcomes(s, a): List<Outcome>
+  }
+  class InvalidSettingsException
+}
+
+package mdp.solver {
+  interface Solver {
+    +current(): Snapshot
+    +history(): List<Snapshot>
+    +converged(): boolean
+    +exhausted(): boolean
+    +step()
+    +solve()
+  }
+  class ValueIteration
+  class PolicyIteration {
+    -evaluate()
+    -improve()
+  }
+  enum Algorithm {
+    VALUE
+    POLICY
+    +create(mdp): Solver
+  }
+  class Bellman {
+    +{static} expected(mdp, s, a, u): double
+    ~{static} best(mdp, s, u): Move
+    ~{static} improve(mdp, u): Policy
+  }
+  class Snapshot <<record>> {
+    +iteration: int
+    +delta: double
+    +changed: int
+    +sweeps: int
+  }
+  enum Phase {
+    START
+    VALUE
+    EVALUATE
+    IMPROVE
+  }
+  class Utilities {
+    +get(s: Cell): double
+  }
+  class Policy {
+    +get(s: Cell): Move
+  }
+}
+
+Cell ..> Move
+GridWorld o-- Cell
+GridWorld ..> CellKind
+Mdp *-- GridWorld
+Mdp *-- Settings
+Mdp ..> Outcome
+Settings ..> InvalidSettingsException
+GridSize ..> InvalidSettingsException
+Solver <|.. ValueIteration
+Solver <|.. PolicyIteration
+Algorithm ..> Solver
+ValueIteration --> Mdp
+PolicyIteration --> Mdp
+ValueIteration ..> Bellman
+PolicyIteration ..> Bellman
+Solver o-- "1..*" Snapshot : history
+Snapshot *-- Utilities
+Snapshot *-- Policy
+Snapshot --> Phase
+@enduml

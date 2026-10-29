@@ -1,0 +1,26 @@
+@startuml activity_policy
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam shadowing false
+title Диаграмма деятельности: итерация по стратегиям
+
+start
+:стратегия π: все стрелки вверх;\nU(s) = 0, в выходах награда;
+repeat
+  partition "Оценка (нажатие «Итерация»)" {
+    repeat
+      :для каждой клетки s:\nU'(s) = R(s) + γ · Σ T(s, π(s), s') · U(s');
+      :δ = наибольшее изменение; U = U';
+    repeat while (δ ≥ 10^-9 и проходов < 10000?) is (да)
+    ->нет;
+  }
+  partition "Улучшение (следующее нажатие)" {
+    :для каждой клетки s:\nπ'(s) = ход с наибольшим Σ T(s,a,s') · U(s');
+    :изменено = число клеток, где π'(s) ≠ π(s);\nπ = π';
+  }
+repeat while (изменено > 0 и итераций < 100?) is (да)
+->нет;
+:решено: стрелки больше не меняются;
+stop
+@enduml

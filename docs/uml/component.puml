@@ -1,0 +1,39 @@
+@startuml component
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam shadowing false
+title Диаграмма компонентов (модуль mdp)
+
+package "Модуль mdp" {
+  component "mdp\n(Launcher)" as launcher
+  component "mdp.view\n(окно JavaFX: MdpApp,\nGridCanvas, FormDialog)" as view
+  component "mdp.controller\n(логика окна: AppController,\nформы, Texts, SpeedScale)" as controller
+  component "mdp.robot\n(Robot, RobotStep)" as robot
+  component "mdp.solver\n(ValueIteration, PolicyIteration,\nBellman)" as solver
+  component "mdp.model\n(поле, параметры, переходы)" as model
+  component "mdp.util\n(SafeText)" as util
+}
+
+component "JavaFX\n(javafx.controls,\njavafx.graphics)" as javafx
+component "JUnit 6\n(только тесты)" as junit
+
+launcher ..> view
+launcher ..> javafx
+view ..> controller
+view ..> robot
+view ..> solver
+view ..> model
+view ..> javafx
+controller ..> robot
+controller ..> solver
+controller ..> model
+controller ..> util
+robot ..> solver
+robot ..> model
+solver ..> model
+junit ..> model
+junit ..> solver
+junit ..> robot
+junit ..> controller
+@enduml

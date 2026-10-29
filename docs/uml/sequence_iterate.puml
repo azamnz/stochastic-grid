@@ -1,0 +1,35 @@
+@startuml sequence_iterate
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam shadowing false
+title Диаграмма последовательности: кнопка «Итерация»
+
+actor Пользователь as user
+participant MdpApp as app
+participant AppController as c
+participant "solver:\nPolicyIteration" as pi
+participant Bellman as b
+participant Mdp as mdp
+participant GridCanvas as canvas
+
+user -> app : «Итерация»
+app -> c : iterate()
+c -> pi : step()
+alt последний шаг — улучшение или начало
+  loop пока числа меняются
+    pi -> b : expected(mdp, s, π(s), U)
+    b -> mdp : outcomes(s, a)
+    mdp --> b : 3 исхода: 0.8, 0.1, 0.1
+    b --> pi : среднее
+  end
+  pi -> pi : Snapshot(EVALUATE)
+else последний шаг — оценка
+  pi -> b : improve(mdp, U)
+  b --> pi : новые стрелки
+  pi -> pi : Snapshot(IMPROVE)
+end
+c -> c : робот на старт\nс новыми стрелками
+app -> canvas : show(world, snapshot, robot)
+app -> app : журнал, состояние
+@enduml

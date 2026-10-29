@@ -1,0 +1,87 @@
+@startuml class_app
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam shadowing false
+skinparam classAttributeIconSize 0
+title Диаграмма классов: робот, управление и окно
+
+package mdp.robot {
+  class Robot {
+    -position: Cell
+    -total: double
+    +step()
+    +finished(): boolean
+    +stopped(): boolean
+    +journal(): List<RobotStep>
+    ~{static} pick(outcomes, r): Outcome
+  }
+  class RobotStep <<record>> {
+    +number: int
+    +from, to: Cell
+    +wanted, actual: Move
+    +reward, total: double
+  }
+}
+
+package mdp.controller {
+  class AppController {
+    -world: GridWorld
+    -settings: Settings
+    -algorithm: Algorithm
+    -solver: Solver
+    -robot: Robot
+    -seed: long
+    +iterate()
+    +solve()
+    +restart()
+    +setAlgorithm(a)
+    +applySettings(s)
+    +newGrid(size)
+    +pdfExample()
+    +clickCell(c): boolean
+    +moveStart(c): boolean
+    +robotStep()
+    +toggleRobot()
+    +newWalk()
+    +tick(nanos)
+  }
+  class SettingsForm
+  class GridForm
+  class FormField <<record>>
+  interface FormResult<T>
+  class Texts
+  class SpeedScale
+}
+
+package mdp.view {
+  class MdpApp
+  class GridCanvas
+  class "FormDialog<T>" as FormDialog
+}
+
+package javafx {
+  class Application
+  class Pane
+  class Dialog
+}
+
+Robot o-- "*" RobotStep
+Robot --> "mdp.model.Mdp"
+Robot --> "mdp.solver.Policy"
+AppController *-- Robot
+AppController *-- "mdp.solver.Solver"
+SettingsForm ..> FormField
+GridForm ..> FormField
+SettingsForm ..> FormResult
+GridForm ..> FormResult
+MdpApp *-- AppController
+MdpApp *-- GridCanvas
+MdpApp ..> FormDialog
+MdpApp ..> SettingsForm
+MdpApp ..> Texts
+MdpApp ..> SpeedScale
+Application <|-- MdpApp
+Pane <|-- GridCanvas
+Dialog <|-- FormDialog
+@enduml

@@ -1,0 +1,31 @@
+@startuml activity_value
+!pragma layout smetana
+skinparam dpi 150
+skinparam defaultFontName Arial
+skinparam shadowing false
+title Диаграмма деятельности: итерация по значениям
+
+start
+:U(s) = 0 для обычных клеток,\nU(s) = награда для выходов;
+repeat
+  :новая таблица U';
+  repeat :взять следующую клетку s;
+    if (s — выход?) then (да)
+      :U'(s) = R(s);
+    else (нет)
+      :для каждого из 4 ходов a:\nсреднее = Σ T(s,a,s') · U(s')\n(вперёд 0.8, вбок 0.1 и 0.1,\nв стену — остаться на месте);
+      :U'(s) = R(s) + γ · max по ходам;
+    endif
+  repeat while (есть ещё клетки?) is (да)
+  ->нет;
+  :стрелка π(s) — ход с наибольшим средним;
+  :δ = наибольшее |U'(s) − U(s)|;\nU = U';
+repeat while (δ ≥ 0.000001 и итераций < 10000?) is (да)
+->нет;
+if (δ < 0.000001?) then (да)
+  :решено: U(s) и стрелки как в задании;
+else (нет)
+  :не сошлось (лимит итераций);
+endif
+stop
+@enduml
