@@ -102,5 +102,6 @@ class PolicyIterationTest {
         assertFalse(pi.converged());
         assertTrue(pi.exhausted());
         assertEquals(PolicyIteration.MAX_ITERATIONS, pi.current().iteration());
+        assertEquals(Phase.IMPROVE, pi.current().phase(), "последняя итерация доведена до улучшения");
     }
 }
