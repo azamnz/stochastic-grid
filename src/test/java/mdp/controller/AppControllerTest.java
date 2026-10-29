@@ -184,6 +184,22 @@ class AppControllerTest {
     }
 
     @Test
+    void seedGivenAtStartIsUsedForWalks() {
+        AppController c = new AppController(42);
+        assertEquals(42, c.seed());
+        c.solve();
+        mdp.robot.Robot same = new mdp.robot.Robot(new mdp.model.Mdp(c.world(), c.settings()),
+                c.solver().current().policy(), 42);
+        for (int i = 0; i < 6; i++) {
+            c.robotStep();
+            same.step();
+        }
+        assertEquals(same.journal(), c.robot().journal());
+        c.newWalk();
+        assertEquals(43, c.seed());
+    }
+
+    @Test
     void runningMakesStepsBySpeed() {
         AppController c = new AppController();
         c.solve();

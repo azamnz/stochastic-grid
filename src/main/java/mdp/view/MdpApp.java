@@ -40,11 +40,13 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 /** Главное окно: поле с U(s) и стрелками, справа параметры и робот, внизу журналы решения и пути */
 public class MdpApp extends Application {
 
-    private final AppController controller = new AppController();
+    /** Каждый запуск — свой случайный путь робота */
+    private final AppController controller = new AppController(new Random().nextLong());
     private final GridCanvas grid = new GridCanvas(c -> {
         controller.clickCell(c);
         refresh();

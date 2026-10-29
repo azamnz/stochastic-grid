@@ -30,7 +30,7 @@ public class AppController {
     private Algorithm algorithm = Algorithm.VALUE;
     private Solver solver;
     private Robot robot;
-    private long seed = 1;
+    private long seed;
     private String message;
     private boolean running;
     private int speed = DEFAULT_SPEED;
@@ -40,7 +40,14 @@ public class AppController {
     /** Накопленное время × скорость: целая часть от деления на секунду — сколько шагов пора сделать */
     private long stepDebt;
 
+    /** Seed 1: тесты и отчёт повторяют одни и те же пути */
     public AppController() {
+        this(1);
+    }
+
+    /** @param seed номер случайности для первого пути робота; «Новый путь» берёт следующий */
+    public AppController(long seed) {
+        this.seed = seed;
         restart();
     }
 
