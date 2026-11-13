@@ -14,7 +14,37 @@ public final class Bellman {
     /** Ход лучше, только если выигрывает больше этого: на равенствах без дрожания из-за округлений */
     static final double TIE = 1e-12;
 
+    /** Оценка сошлась, когда за проход ни одно U не сдвинулось больше этого */
+    public static final double EPSILON = 1e-9;
+    /** Предел проходов оценки: стратегия может никогда не дойти до выхода */
+    public static final int MAX_SWEEPS = 10_000;
+
     private Bellman() {
+    }
+
+    /** Полезность стратегии U^π с нуля */
+    public static Evaluation evaluate(Mdp mdp, Policy policy) {
+        return evaluate(mdp, policy, Utilities.initial(mdp));
+    }
+
+    /** Оценка стратегии: U_{i+1}(s) = R(s) + γ·Σ T(s,π(s),s')·U_i(s') до схождения, начиная с from */
+    static Evaluation evaluate(Mdp mdp, Policy policy, Utilities from) {
+        double gamma = mdp.settings().gamma();
+        Utilities u = from;
+        int sweeps = 0;
+        double delta;
+        do {
+            Map<Cell, Double> next = new HashMap<>();
+            for (Cell s : mdp.states()) {
+                next.put(s, mdp.terminal(s) ? mdp.reward(s)
+                        : mdp.reward(s) + gamma * expected(mdp, s, policy.get(s), u));
+            }
+            Utilities nu = new Utilities(next);
+            delta = nu.maxDiff(u);
+            u = nu;
+            sweeps++;
+        } while (delta >= EPSILON && sweeps < MAX_SWEEPS);
+        return new Evaluation(u, sweeps, delta < EPSILON);
     }
 
     /** Σ T(s,a,s')·U(s') */

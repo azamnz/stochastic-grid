@@ -15,8 +15,6 @@ import java.util.Map;
  */
 public final class PolicyIteration implements Solver {
 
-    public static final double EPSILON = 1e-9;
-    public static final int MAX_SWEEPS = 10_000;
     public static final int MAX_ITERATIONS = 100;
 
     private final Mdp mdp;
@@ -51,25 +49,10 @@ public final class PolicyIteration implements Solver {
     /** Оценка: числа для текущих стрелок; начинаем с прошлой U, так быстрее */
     private void evaluate() {
         Snapshot last = current();
-        Policy policy = last.policy();
-        double gamma = mdp.settings().gamma();
-        Utilities u = last.utilities();
-        int sweeps = 0;
-        double delta;
-        do {
-            Map<Cell, Double> next = new HashMap<>();
-            for (Cell s : mdp.states()) {
-                next.put(s, mdp.terminal(s) ? mdp.reward(s)
-                        : mdp.reward(s) + gamma * Bellman.expected(mdp, s, policy.get(s), u));
-            }
-            Utilities nu = new Utilities(next);
-            delta = nu.maxDiff(u);
-            u = nu;
-            sweeps++;
-        } while (delta >= EPSILON && sweeps < MAX_SWEEPS);
-        evaluated = delta < EPSILON;
-        history.add(new Snapshot(last.iteration() + 1, u, policy, u.maxDiff(last.utilities()), 0, sweeps,
-                Phase.EVALUATE));
+        Evaluation e = Bellman.evaluate(mdp, last.policy(), last.utilities());
+        evaluated = e.converged();
+        history.add(new Snapshot(last.iteration() + 1, e.utilities(), last.policy(),
+                e.utilities().maxDiff(last.utilities()), 0, e.sweeps(), Phase.EVALUATE));
     }
 
     /** Улучшение: в каждой клетке лучший ход по только что посчитанным числам */
