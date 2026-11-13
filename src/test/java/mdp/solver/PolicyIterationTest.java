@@ -93,6 +93,16 @@ class PolicyIterationTest {
     }
 
     @Test
+    void laterEvaluationStartsFromPreviousUtilities() {
+        // замер на 4×3: третья оценка 10 проходов с прошлой U против 33 с нуля
+        PolicyIteration pi = new PolicyIteration(pdf);
+        pi.solve();
+        Snapshot third = pi.history().stream().filter(s -> s.phase() == Phase.EVALUATE).skip(2).findFirst()
+                .orElseThrow();
+        assertTrue(third.sweeps() < Bellman.evaluate(pdf, third.policy()).sweeps() / 2);
+    }
+
+    @Test
     void neverEndingWorldIsCutOff() {
         GridWorld noExits = GridWorld.pdfExample().cycle(new Cell(4, 3)).cycle(new Cell(4, 3))
                 .cycle(new Cell(4, 2));
