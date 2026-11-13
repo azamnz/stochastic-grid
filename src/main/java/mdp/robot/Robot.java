@@ -4,13 +4,15 @@ import mdp.model.Cell;
 import mdp.model.Mdp;
 import mdp.model.Move;
 import mdp.model.Outcome;
+import mdp.solver.Bellman;
 import mdp.solver.Policy;
+import mdp.solver.Utilities;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-/** Робот идёт по стрелкам стратегии, ветер сносит его случайно (по seed) */
+/** Агент: решает по стратегии, куда идти, ветер сносит его случайно (по seed) */
 public final class Robot {
 
     public static final int MAX_STEPS = 1000;
@@ -44,17 +46,32 @@ public final class Robot {
         return outcomes.getLast();
     }
 
+    /** Один шаг агента: решить, куда идти, и пойти */
     public void step() {
+        move(decide());
+    }
+
+    /** Решение о направлении: стрелка стратегии в текущей клетке; на выходе null */
+    public Move decide() {
+        return policy.get(position);
+    }
+
+    /** Перемещение: хотим в wanted, ветер сносит случайно; награда и запись в журнал */
+    public void move(Move wanted) {
         if (finished() || stopped()) {
             return;
         }
-        Move wanted = policy.get(position);
         Outcome o = pick(mdp.outcomes(position, wanted), random.nextDouble());
         discount *= mdp.settings().gamma();
         double reward = mdp.reward(o.to());
         total += discount * reward;
         journal.add(new RobotStep(steps() + 1, position, wanted, o.move(), o.to(), reward, total));
         position = o.to();
+    }
+
+    /** Полезность стратегии агента U^π(s) для каждой клетки */
+    public Utilities utility() {
+        return Bellman.evaluate(mdp, policy).utilities();
     }
 
     public Cell position() {

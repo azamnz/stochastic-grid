@@ -15,6 +15,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class RobotTest {
@@ -141,6 +142,67 @@ class RobotTest {
         assertEquals(-0.04, r.total(), 1e-12);
         assertEquals(0, r.steps());
         assertFalse(r.finished());
+    }
+
+    @Test
+    void decideTakesArrowOfCurrentCellWithoutMoving() {
+        Mdp mdp = new Mdp(GridWorld.pdfExample().withStart(new Cell(3, 1)), Settings.defaults());
+        Robot r = new Robot(mdp, solved(mdp), 1);
+        assertEquals(Move.LEFT, r.decide());
+        assertEquals(new Cell(3, 1), r.position());
+        assertEquals(0, r.steps());
+        Mdp pdf = new Mdp(GridWorld.pdfExample(), Settings.defaults());
+        assertEquals(Move.UP, new Robot(pdf, solved(pdf), 1).decide());
+    }
+
+    @Test
+    void decideAtExitIsNothing() {
+        Mdp sure = new Mdp(GridWorld.pdfExample(), new Settings(-0.04, 1, 1));
+        assertNull(run(sure, solved(sure), 1).decide());
+    }
+
+    @Test
+    void moveGoesWhereToldNotByArrow() {
+        // стрелка в (1,1) — вверх, а идём направо
+        Mdp sure = new Mdp(GridWorld.pdfExample(), new Settings(-0.04, 1, 1));
+        Robot r = new Robot(sure, solved(sure), 1);
+        r.move(Move.RIGHT);
+        assertEquals(new Cell(2, 1), r.position());
+        assertEquals(1, r.steps());
+        assertEquals(Move.RIGHT, r.journal().getFirst().wanted());
+        assertEquals(-0.08, r.total(), 1e-12);
+    }
+
+    @Test
+    void finishedRobotIgnoresMove() {
+        Mdp sure = new Mdp(GridWorld.pdfExample(), new Settings(-0.04, 1, 1));
+        Robot r = run(sure, solved(sure), 1);
+        r.move(Move.LEFT);
+        assertEquals(5, r.steps());
+        assertEquals(new Cell(4, 3), r.position());
+    }
+
+    @Test
+    void stepIsDecideThenMove() {
+        Mdp mdp = new Mdp(GridWorld.pdfExample(), Settings.defaults());
+        Policy p = solved(mdp);
+        Robot byStep = run(mdp, p, 7);
+        Robot byHand = new Robot(mdp, p, 7);
+        while (!byHand.finished() && !byHand.stopped()) {
+            byHand.move(byHand.decide());
+        }
+        assertEquals(byStep.journal(), byHand.journal());
+    }
+
+    @Test
+    void utilityIsValueOfOwnPolicy() {
+        Mdp mdp = new Mdp(GridWorld.pdfExample(), Settings.defaults());
+        Robot best = new Robot(mdp, solved(mdp), 1);
+        assertEquals(0.705, Math.round(best.utility().get(new Cell(1, 1)) * 1000) / 1000.0);
+        assertEquals(0.918, Math.round(best.utility().get(new Cell(3, 3)) * 1000) / 1000.0);
+        // у «всё вверх» полезность в старте меньше
+        Robot up = new Robot(mdp, Algorithm.POLICY.create(mdp).current().policy(), 1);
+        assertTrue(up.utility().get(new Cell(1, 1)) < 0.705 - 0.01);
     }
 
     @Test
