@@ -17,12 +17,13 @@ user -> app : «Итерация»
 app -> c : iterate()
 c -> pi : step()
 alt последний шаг — улучшение или начало
+  pi -> b : evaluate(mdp, π, U)
   loop пока числа меняются
-    pi -> b : expected(mdp, s, π(s), U)
-    b -> mdp : outcomes(s, a)
+    b -> mdp : outcomes(s, π(s))
     mdp --> b : 3 исхода: 0.8, 0.1, 0.1
-    b --> pi : среднее
+    b -> b : U(s) = R(s) + γ · среднее
   end
+  b --> pi : Evaluation (U^π, проходы)
   pi -> pi : Snapshot(EVALUATE)
 else последний шаг — оценка
   pi -> b : improve(mdp, U)

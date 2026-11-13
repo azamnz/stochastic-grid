@@ -84,8 +84,14 @@ package mdp.solver {
   }
   class Bellman {
     +{static} expected(mdp, s, a, u): double
+    +{static} evaluate(mdp, π): Evaluation
     ~{static} best(mdp, s, u): Move
     ~{static} improve(mdp, u): Policy
+  }
+  class Evaluation <<record>> {
+    +utilities: Utilities
+    +sweeps: int
+    +converged: boolean
   }
   class Snapshot <<record>> {
     +iteration: int
@@ -122,6 +128,7 @@ ValueIteration --> Mdp
 PolicyIteration --> Mdp
 ValueIteration ..> Bellman
 PolicyIteration ..> Bellman
+Bellman ..> Evaluation
 Solver o-- "1..*" Snapshot : history
 Snapshot *-- Utilities
 Snapshot *-- Policy

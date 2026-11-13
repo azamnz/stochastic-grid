@@ -3,7 +3,7 @@
 skinparam dpi 150
 skinparam defaultFontName Arial
 skinparam shadowing false
-title Диаграмма последовательности: шаг робота
+title Диаграмма последовательности: шаг агента (робота)
 
 actor Пользователь as user
 participant MdpApp as app
@@ -16,13 +16,19 @@ participant Random as rnd
 user -> app : «Шаг робота»
 app -> c : robotStep()
 c -> r : step()
+r -> r : decide()
+activate r
 r -> p : get(position)
 p --> r : хочу «вверх»
+deactivate r
+r -> r : move(вверх)
+activate r
 r -> mdp : outcomes(position, вверх)
 mdp --> r : вверх 0.8, налево 0.1, направо 0.1
 r -> rnd : nextDouble()
 rnd --> r : 0.87
 r -> r : pick: 0.8 ≤ 0.87 < 0.9 → налево
 r -> r : total += γ^t · R(куда пришёл);\nзапись RobotStep
+deactivate r
 app -> app : перерисовать поле и журнал пути
 @enduml

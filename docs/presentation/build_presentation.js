@@ -1,10 +1,10 @@
-// Сборка презентации по лабораторной работе № 4 (pptxgenjs)
+// Сборка презентации по лабораторной работе № 5 (pptxgenjs)
 const path = require('path');
 const fs = require('fs');
 const pptxgen = require('pptxgenjs');
 
-const PROJECT = '/Users/azatminyazov/Workspace/university java/4 work';
-const OUT = process.env.OUT || path.join(PROJECT, 'docs/presentation/Презентация_ЛР4_Минязов.pptx');
+const PROJECT = '/Users/azatminyazov/Workspace/university java/5 work';
+const OUT = process.env.OUT || path.join(PROJECT, 'docs/presentation/Презентация_ЛР5_Минязов.pptx');
 const shot = n => path.join(PROJECT, 'docs/screenshots', n);
 const uml = n => path.join(PROJECT, 'docs/uml', n);
 
@@ -64,7 +64,7 @@ const bullets = (slide, items, box, size = 17) => slide.addText(
 {
   const s = pres.addSlide();
   s.background = { color: C.dark };
-  s.addText('Лабораторная работа № 4 · ООП на языке Java', { x: 0.6, y: 0.7, w: 6.4, h: 0.4, fontFace: BODY, fontSize: 16, color: 'B4B2A9', margin: 0, isTextBox: true });
+  s.addText('Лабораторная работа № 5 · ООП на языке Java', { x: 0.6, y: 0.7, w: 6.4, h: 0.4, fontFace: BODY, fontSize: 16, color: 'B4B2A9', margin: 0, isTextBox: true });
   s.addText('Стохастическое окружение', { x: 0.6, y: 1.5, w: 6.4, h: 1.4, fontFace: HEAD, fontSize: 40, bold: true, color: C.white, margin: 0, isTextBox: true });
   s.addText('Робота сносит ветром: программа находит стрелки, по которым он чаще всего доходит до +1', { x: 0.6, y: 3.0, w: 6.2, h: 1.3, fontFace: BODY, fontSize: 20, color: 'D3D1C7', margin: 0, isTextBox: true });
   s.addText([
@@ -227,7 +227,7 @@ const bullets = (slide, items, box, size = 17) => slide.addText(
   title(s, 'Архитектура', 'Модель — алгоритмы — робот — управление — окно; всё кроме окна не зависит от JavaFX');
   const cols = [
     ['model', 'GridWorld — поле, правка\nSettings — R(s), γ, p\nMdp — исходы хода:\n0,8 / 0,1 / 0,1, стена', PLUS, C.pathBg],
-    ['solver + robot', 'Solver — интерфейс\nValueIteration, PolicyIteration\nBellman — среднее, лучший ход\nRobot — путь со сносом', ARROW, C.waterBg],
+    ['solver + robot', 'Solver — интерфейс\nValueIteration, PolicyIteration\nBellman — среднее, лучший ход\nRobot — агент: decide, move, utility', ARROW, C.waterBg],
     ['controller + view', 'AppController — кнопки, таймер\nSettingsForm, GridForm — ввод\nMdpApp, GridCanvas — окно\nFormDialog — новое поле', C.cheese, C.cheeseBg],
   ];
   cols.forEach(([name, text, col, bg], i) => {
@@ -271,7 +271,7 @@ const bullets = (slide, items, box, size = 17) => slide.addText(
     ['Два алгоритма', 'итерация по значениям и по стратегиям — таблица и стрелки задания'],
     ['Ход решения', 'по итерациям; для стратегий — отдельно оценка и улучшение'],
     ['Эксперименты', 'своё поле до 10×10, R(s), γ, вероятность; робот со сносом'],
-    ['ООП, UML, тесты', 'шесть пакетов; шесть видов UML; 141 автотест'],
+    ['ООП, UML, тесты', 'шесть пакетов; шесть видов UML; 151 автотест'],
   ];
   res.forEach(([name, text], i) => {
     const y = 1.9 + i * 1.2;

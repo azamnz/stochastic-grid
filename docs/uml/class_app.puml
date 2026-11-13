@@ -4,13 +4,16 @@ skinparam dpi 150
 skinparam defaultFontName Arial
 skinparam shadowing false
 skinparam classAttributeIconSize 0
-title Диаграмма классов: робот, управление и окно
+title Диаграмма классов: агент (робот), управление и окно
 
 package mdp.robot {
-  class Robot {
+  class Robot <<агент>> {
     -position: Cell
     -total: double
+    +decide(): Move
+    +move(wanted: Move)
     +step()
+    +utility(): Utilities
     +finished(): boolean
     +stopped(): boolean
     +journal(): List<RobotStep>
@@ -69,6 +72,7 @@ package javafx {
 Robot o-- "*" RobotStep
 Robot --> "mdp.model.Mdp"
 Robot --> "mdp.solver.Policy"
+Robot ..> "mdp.solver.Bellman" : evaluate
 AppController *-- Robot
 AppController *-- "mdp.solver.Solver"
 SettingsForm ..> FormField

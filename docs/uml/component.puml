@@ -9,8 +9,8 @@ package "Модуль mdp" {
   component "mdp\n(Launcher)" as launcher
   component "mdp.view\n(окно JavaFX: MdpApp,\nGridCanvas, FormDialog)" as view
   component "mdp.controller\n(логика окна: AppController,\nформы, Texts, SpeedScale)" as controller
-  component "mdp.robot\n(Robot, RobotStep)" as robot
-  component "mdp.solver\n(ValueIteration, PolicyIteration,\nBellman)" as solver
+  component "mdp.robot\n(агент Robot, RobotStep)" as robot
+  component "mdp.solver\n(ValueIteration, PolicyIteration,\nBellman, Evaluation)" as solver
   component "mdp.model\n(поле, параметры, переходы)" as model
   component "mdp.util\n(SafeText)" as util
 }
